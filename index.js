@@ -2,22 +2,19 @@ const express = require("express");
 require("isomorphic-fetch");
 const cors = require("cors");
 const fs = require("fs");
+const config = require("./config");
 
 const app = express();
 const port = 3000;
 
-app.use(cors({ origin: "http://localhost:3333" }));
+app.use(cors(config.origin));
 app.use(express.json());
 
-const host = fs.readFileSync("./BASE_URL.txt", "utf8", (err, data) => {
-	if (err) throw err;
-	return data;
-});
+const host = config.baseUrl;
 
 if (!host) {
 	const err = new Error("please add a valid BASE_URL");
 	throw err;
-	e;
 }
 
 app.get("/*", async (req, res) => {
