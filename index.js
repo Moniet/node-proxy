@@ -1,14 +1,24 @@
 const express = require("express");
 require("isomorphic-fetch");
 const cors = require("cors");
+const fs = require("fs");
 
 const app = express();
 const port = 3000;
 
-app.use(cors());
+app.use(cors({ origin: "http://localhost:3333" }));
 app.use(express.json());
 
-const host = "https://rattata.pub.shipit-climbcredit.com";
+const host = fs.readFileSync("./BASE_URL.txt", "utf8", (err, data) => {
+	if (err) throw err;
+	return data;
+});
+
+if (!host) {
+	const err = new Error("please add a valid BASE_URL");
+	throw err;
+	e;
+}
 
 app.get("/*", async (req, res) => {
 	const { params, query, path } = req;
@@ -50,10 +60,11 @@ app.post("/*", async (req, res) => {
 			},
 			body: JSON.stringify(req.body),
 		});
-		const jsData = await requestedData;
+		const jsData = await requestedData.json();
+		console.log(jsData, "data");
 		res.json(jsData);
 	} catch (err) {
-		console.log(err);
+		console.log("post err", err);
 		res.status(502).send(err);
 	}
 });
@@ -79,8 +90,38 @@ app.patch("/*", async (req, res) => {
 		});
 		const jsonData = await requestedData;
 		const jsData = await jsonData.json();
-		console.log(jsData, "data");
-		console.log(requestedData, "res");
+		// console.log(jsData, "data");
+		// console.log(requestedData, "res");
+		res.status(requestedData.status).send(JSON.stringify(jsData));
+	} catch (err) {
+		console.log(err);
+		res.status(502).send(err);
+	}
+});
+
+app.put("/*", async (req, res) => {
+	const { params, query, body } = req;
+	const queryIsEmpty = Object.keys(query).length === 0;
+	const querySlug =
+		!queryIsEmpty &&
+		Object.keys(query)
+			.map((key) => `${key}=${query[key]}`)
+			.join("&");
+	const slug = params[0];
+	const url = `${host}/${slug}${queryIsEmpty ? "" : `?${querySlug}`}`;
+
+	try {
+		const requestedData = await fetch(url, {
+			method: "PUT",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(req.body),
+		});
+		const jsonData = await requestedData;
+		const jsData = await jsonData.json();
+		// console.log(jsData, "data");
+		// console.log(requestedData, "res");
 		res.status(requestedData.status).send(JSON.stringify(jsData));
 	} catch (err) {
 		console.log(err);
