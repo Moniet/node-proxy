@@ -8,4 +8,4 @@
 ### CORS ERRORS
 
 - If you're still having cors errors, try adjusting the origin in the config file to `{ origin: "*" }`
-- But be weary, since the server is **NOT** HTTPS I would advise against using wildcard (i.e `"*"`) on public networks
+- But be wary, since the server is **NOT** HTTPS I would advise against using wildcard (i.e `"*"`) on public networks
